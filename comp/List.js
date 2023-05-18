@@ -173,6 +173,7 @@ const List = (props) => {
           <View>
             <Text>Tiêu Đề : {item.title}</Text>
             <Text>Nội Dung : {item.content}</Text>
+            <Text>Nội Dung : {item.content}</Text>
           </View>
 
 
