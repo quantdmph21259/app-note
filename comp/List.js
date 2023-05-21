@@ -5,16 +5,18 @@ import {
   Text,
   View,
   Alert,
-  Image,
   RefreshControl,
   ActivityIndicator,
   FlatList,
   Pressable,
   Modal,
   TextInput,
-  TouchableOpacity
 } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
+import Edit from './Edit';
+
+//moment (time)
+import moment from 'moment';
 
 const List = (props) => {
   const [data, setData] = useState([]);
@@ -30,13 +32,19 @@ const List = (props) => {
   //modal
   const [showModalDialog, setshowModalDialog] = useState(false);
 
+  // moment
+  const [currentTime, setCurrentTime] = useState('');
 
 
+  var time = moment().format('D M YYYY, h:mm:ss a');
 
   //getList
   const getListNote = async () => {
 
-    const api_list_note = 'https://63db6ac4b8e69785e48197f8.mockapi.io/DemoAPI/Note';
+    const api_list_note = 'https://64649a7e127ad0b8f8a2dcac.mockapi.io/88/Note';
+
+    //time
+
 
     fetch(api_list_note)
       .then((res) => res.json())
@@ -50,7 +58,8 @@ const List = (props) => {
   }
 
   useEffect(() => {
-    getListNote()
+    getListNote();
+    setCurrentTime(time);
   }, [])
 
 
@@ -78,9 +87,9 @@ const List = (props) => {
     }
 
     let objNote = {
-      title: isTitle, content: isContent
+      title: isTitle, content: isContent, time: currentTime
     }
-    let url_api_note ='https://63db6ac4b8e69785e48197f8.mockapi.io/DemoAPI/Note';
+    let url_api_note ='https://64649a7e127ad0b8f8a2dcac.mockapi.io/88/Note';
     fetch(url_api_note, {
       method: 'POST',
       headers: {
@@ -94,6 +103,7 @@ const List = (props) => {
         if (res.status == 201)
           alert("thêm sản phẩm thành công");
         getListNote();
+        setshowModalDialog(false);
         //
 
       })
@@ -112,7 +122,7 @@ const List = (props) => {
   const renderItem = ({ item, index }) => {
     const deleteSP = () => {
       // link xóa
-      let url_api_del = 'https://63db6ac4b8e69785e48197f8.mockapi.io/DemoAPI/Note/' + item.id;
+      let url_api_del = 'https://64649a7e127ad0b8f8a2dcac.mockapi.io/88/Note/' + item.id;
 
       fetch(url_api_del, {
         method: 'DELETE',
@@ -123,7 +133,7 @@ const List = (props) => {
       })
         .then((res) => {
           if (res.status == 200) {
-            alert("Đã xóa");
+            alert("Đã xóa " + item.content);
             getListNote();
           }
 
@@ -137,7 +147,7 @@ const List = (props) => {
     const showDialog = () => {
       Alert.alert(
         'Thông báo',
-        'Bạn có muốn xóa user? ',
+        'Bạn có muốn xóa ' + item.title + " ?",
         [
           //mảng nút bấm
           {
@@ -162,19 +172,20 @@ const List = (props) => {
       <View>
         <View style={styles.box1}>
 
-          <View style={{ flexDirection: 'column' }}>
-            <View style={{ flexDirection: 'row', marginTop: 90, justifyContent: 'center', position: 'absolute', padding: 4 }}>
-              <Pressable style={{ width: 40, height: 30, borderRadius: 12, backgroundColor: "#EDF1D6", marginLeft: 4 }}>
+          <View style={{ flexDirection: 'column', position:'absolute', right:18, marginTop:26 }}>
+              <Pressable style={{ width: 40, height: 30, borderRadius: 12, backgroundColor: "#EDF1D6",}}>
                 <Text style={{ textAlign: 'center', margin: 4 }} onPress={showDialog}>Xóa</Text>
               </Pressable>
-            </View>
-          </View>
 
-          <View>
-            <Text>Tiêu Đề : {item.title}</Text>
-            <Text>Nội Dung : {item.content}</Text>
+              {/* sửa */}
+              <Edit item_edit={item} getListEdit={getListNote} />
+            
           </View>
+        
 
+            <Text style={{fontSize:22, top:0, right:"-50%"}}>{item.title}</Text>
+            <Text style={{marginTop:60, position:'absolute'}}>Nội Dung : {item.content}</Text>
+            <Text style={{position:'absolute', bottom:0, right:8}}>{item.time}</Text>
 
         </View>
         {/* modal chi tiết xe */}
@@ -185,7 +196,7 @@ const List = (props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flexDirection: 'row', marginLeft: 80, marginTop: 66 }}>
+      <View style={{ flexDirection: 'row', marginLeft: 140, marginTop: 66 }}>
         <Text style={{ fontSize: 22, fontWeight: 'bold', textAlign: 'center', color: 'black' }}>Ghi Chú</Text>
 
         < Pressable style={styles.button_them}>
@@ -205,10 +216,11 @@ const List = (props) => {
         <View style={styles.khung_modal}>
           <View style={styles.box3}>
             <Text style={styles.text_Modal}>- Tiêu Đề</Text>
-            <TextInput placeholder="Mời nhập tiêu đề" style={styles.textInput_Modal} onChangeText={(txt) => { setIsTitle(txt) }} />
+            <TextInput placeholder="Mời nhập tiêu đề" style={styles.textInput_Modal} onChangeText={(txt) => { setIsTitle(txt) }}/>
             <Text style={styles.text_Modal}>- Nội Dung</Text>
-            <TextInput placeholder="Mời nhập nội dung" style={styles.textInput_Modal} onChangeText={(txt) => { setIsTime(txt) }} />
+            <TextInput placeholder="Mời nhập nội dung" style={styles.textInput_Modal} onChangeText={(txt) => { setIsContent(txt) }}/>
             <Text style={styles.text_Modal}>- Thời gian</Text>
+            <TextInput  style={styles.textInput_Modal} onChangeText={(txt) => { setCurrentTime(txt) }}  value={time}/>
           </View>
           <View style={styles.box4}>
             <Pressable style={styles.button_Modal}>
@@ -255,7 +267,7 @@ const styles = StyleSheet.create({
   },
   box1: {
     width: 333,
-    height: 122,
+    height: 222,
     flexDirection: "row",
     borderWidth: 1,
     borderRadius: 12,
@@ -283,7 +295,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#8EA7E9",
     width: 277,
-    height: 555,
+    height: 300,
     margin: 40,
     borderRadius: 22,
 
@@ -306,7 +318,7 @@ const styles = StyleSheet.create({
   },
   box4: {
     flexDirection: "row",
-    marginLeft: 60,
+    marginLeft: 70,
   },
   button_Modal: {
     width: 60,
