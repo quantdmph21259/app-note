@@ -35,9 +35,7 @@ const List = (props) => {
   // moment
   const [currentTime, setCurrentTime] = useState('');
 
-
   var time = moment().format('D M YYYY, h:mm:ss a');
-
   //getList
   const getListNote = async () => {
 
